@@ -8,14 +8,24 @@ function App() {
   const sendMessage = async () => {
     if (!message.trim()) return;
 
-    const response = await fetch('http://localhost:5000/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message }),
-    });
-    const data = await response.json();
-    setChat([...chat, { user: message, bot: data.reply }]);
-    setMessage('');
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setChat([...chat, { user: message, bot: data.reply }]);
+      setMessage('');
+    } catch (err) {
+      console.error('Error sending message:', err);
+      alert('Failed to send message. Please try again.');
+    }
   };
 
   return (
